@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        mineAI
 // @namespace   minesAI
-// @include     http://minesweeperonline.com/#beginner-night
+// @include     http://minesweeperonline.com/#*
 // @version     1
 // @required    http://localhost:8000/convnetjs.js
 // @grant       none
@@ -43,7 +43,7 @@ function initConvNetJs () {
     layer_defs.push({type:'softmax', num_classes:2});
 
     // defined our net with unsafeWindow for use in GreaseMonkey
-    var net = new unsafeWindow.convnetjs.Net();
+    var net = new convnetjs.Net();
   
     // create our net with layers as defined above
     net.makeLayers(layer_defs);
