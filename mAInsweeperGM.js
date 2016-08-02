@@ -3,20 +3,23 @@
 // @namespace   minesAI
 // @include     http://minesweeperonline.com/#*
 // @version     1
-// @required    http://localhost:8000/convnetjs.js
 // @grant       none
 // ==/UserScript==
 
-// Load the library.
-var D           = document;
-var appTarg     = D.getElementsByTagName ('head')[0]  ||  D.body  ||  D.documentElement;
-var jsNode      = D.createElement ('script');
+// Load the libraries ########################################################
+var D              = document;
+var appTarg        = D.getElementsByTagName ('head')[0]  ||  D.body  ||  D.documentElement;
+var convNetNode    = D.createElement ('script');
+var controllerNode = D.createElement ('script');
 
-jsNode.src      = 'http://localhost:8000/convnetjs.js';
-jsNode.addEventListener ("load", initConvNetJsOnDelay, false);
+convNetNode.src    = 'http://localhost:8000/convnetjs.js';
+controllerNode.src = 'http://localhost:8000/controller.js';
+convNetNode.addEventListener ("load", initConvNetJsOnDelay, false);
 
-appTarg.appendChild (jsNode);
+appTarg.appendChild (convNetNode);
+appTarg.appendChild (controllerNode);
 
+// Main script ###############################################################
 
 // Allow some time for the library to initialize after loading.
 function initConvNetJsOnDelay () {
@@ -25,20 +28,20 @@ function initConvNetJsOnDelay () {
 
 // Call the library's start-up function, if any. Note needed use of unsafeWindow.
 function initConvNetJs () {
-    
+
     // species a 2-layer neural network with one hidden layer of 20 neurons
     var layer_defs = [];
-  
+
     // ConvNetJS works on 3-Dimensional volumes (sx, sy, depth), but if you're not dealing with images
     // then the first two dimensions (sx, sy) will always be kept at size 1
     layer_defs.push({type:'input', out_sx:1, out_sy:1, out_depth:2});
-  
+
     // declare 4 neurons, followed by ReLU (rectified linear unit non-linearity)
     layer_defs.push({type:'fc', num_neurons:4, activation:'relu'});
-  
+
     // 3 more for good measure 
     layer_defs.push({type:'fc', num_neurons:3, activation:'relu'}); 
- 
+
     // declare the linear classifier on top of the previous hidden layer
     layer_defs.push({type:'softmax', num_classes:2});
 

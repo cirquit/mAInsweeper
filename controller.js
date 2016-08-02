@@ -1,20 +1,37 @@
-var oldState = [];
+// oldState ist used to check if the state has changed after a "move" 
+var oldState     = [];
+
+// holds the current state of the minesweeper game
 var currentState = [];
 
+// fills currentState with the current state of the minesweeper game
 function getFieldState() {
-    var newsState   = document.getElementsByClassName('square');
-    var newStateIDs = [];
-    for (var i = 0; i < newsState.length; i++) {
-        if(newsState[i].style.display != "none") newStateIDs.push(newsState[i]);
+
+    // get all div elements with class name 'square'
+    var squareDivs   = document.getElementsByClassName('square');
+
+    // container for clickable divs
+    var squares = [];
+
+    // filter out the real squares
+    for (var i = 0; i < squareDivs.length; i++) {
+        if(squareDivs[i].style.display != "none") squares.push(squareDivs[i]);
     }
+
+    // copy the state to compare later
     oldState = currentState.slice();
 
-    for (var i = 0; i < newStateIDs.length; i++) {
-        switch(newStateIDs[i].className.substring(7)){
-            case "blank": currentState[i] = -1; break;
+    // parse the state
+    // "blank"        <=> -1 --> clickable field
+    // "bombrevealed" <=> -2 --> a bomb is revealed and the game is over
+    // "bombdeath"    <=> -3 --> this is the bomb that blew the game
+    // else parse the value of the square because it's open that ranges between 0 and 8.
+    for (var i = 0; i < squares.length; i++) {
+        switch(squares[i].className.substring(7)){
+            case "blank":        currentState[i] = -1; break;
             case "bombrevealed": currentState[i] = -2; break;
-            case "bombdeath": currentState[i] = -3; break;
-            default: currentState[i] = parseInt(newStateIDs[i].className.substring(11,12));
+            case "bombdeath":    currentState[i] = -3; break;
+            default:             currentState[i] = parseInt(squares[i].className.substring(11,12));
         }
     }
 }
@@ -63,7 +80,7 @@ function newGame(){
     simulate(document.getElementById('face'), "mouseup");  
 }
 
-function randomPlay(i) {
+function randomPlay(gameCount) {
     var sq = document.getElementsByClassName('square');
     var squares = [];
     for (var i = 0; i < sq.length; i++) {
@@ -72,7 +89,7 @@ function randomPlay(i) {
     var rand;
     var count = 0;
 
-    while(i>0){
+    while(gameCount>0){
         newGame();
         console.log("New Game created#######################################");
         while(!gameEnded()){
@@ -85,12 +102,15 @@ function randomPlay(i) {
             clickSquare(x,y);
             console.log("Square clicked");
         }
-        i--;
+        gameCount--;
     }
-    console.log("Clicked: " + i);
+    console.log("Clicked: " + gameCount);
 
 }
 
+
+
+// simulate clicks on divs (some SO answer)
 function simulate(element, eventName)
 {
     var options = extend(defaultOptions, arguments[2] || {});
@@ -130,16 +150,21 @@ function simulate(element, eventName)
     return element;
 }
 
+
+// used by 'simulate'
 function extend(destination, source) {
     for (var property in source)
       destination[property] = source[property];
     return destination;
 }
 
+// used by 'simulate'
 var eventMatchers = {
     'HTMLEvents': /^(?:load|unload|abort|error|select|change|submit|reset|focus|blur|resize|scroll)$/,
     'MouseEvents': /^(?:click|dblclick|mouse(?:down|up|over|move|out))$/
 }
+
+// used by 'simulate'
 var defaultOptions = {
     pointerX: 0,
     pointerY: 0,
