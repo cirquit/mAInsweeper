@@ -35,26 +35,37 @@ function initConvNetJs () {
 
     // ConvNetJS works on 3-Dimensional volumes (sx, sy, depth), but if you're not dealing with images
     // then the first two dimensions (sx, sy) will always be kept at size 1
-    // layer_defs.push({type:'input', out_sx:9, out_sy:9, out_depth:1});
-    // layer_defs.push({type:'conv', sx:3, filters:8, stride:1, activation:'relu'});
-    // layer_defs.push({type:'pool', sx:2, stride:2});
-    // layer_defs.push({type:'fc', num_neurons:20, activation:'relu'});
+layer_defs = [];
+layer_defs.push({type:'input', out_sx:9, out_sy:9, out_depth:1});
+layer_defs.push({type:'conv', sx:5, filters:16, stride:1, pad:2, activation:'relu'});
+layer_defs.push({type:'pool', sx:2, stride:2});
+layer_defs.push({type:'conv', sx:5, filters:20, stride:1, pad:2, activation:'relu'});
+layer_defs.push({type:'pool', sx:2, stride:2});
+layer_defs.push({type:'conv', sx:5, filters:20, stride:1, pad:2, activation:'relu'});
+layer_defs.push({type:'pool', sx:2, stride:2});
+layer_defs.push({type:'regression', num_neurons:2});
 
-    layer_defs.push({type:'input', out_sx:1, out_sy:1, out_depth:81});
-    layer_defs.push({type:'fc', num_neurons:100,  activation:'relu'});
-    layer_defs.push({type:'fc', num_neurons:50,  activation:'relu'});
-    layer_defs.push({type:'fc', num_neurons:20,  activation:'relu'});
-    layer_defs.push({type:'fc', num_neurons:10,  activation:'relu'});
-    layer_defs.push({type:'regression', num_neurons:2});
+net = new convnetjs.Net();
+net.makeLayers(layer_defs);
 
-    // define our net
-    var net = new convnetjs.Net();
+trainer = new convnetjs.SGDTrainer(net, {method:'adadelta', batch_size:4, l2_decay:0.0001});
 
-    // create our net with layers as defined above
-    net.makeLayers(layer_defs);
 
-    // define trainer
-    var trainer = new convnetjs.SGDTrainer(net, {learning_rate:0.01, l2_decay:0.001});
+//    layer_defs.push({type:'input', out_sx:1, out_sy:1, out_depth:81});
+//    layer_defs.push({type:'fc', num_neurons:100,  activation:'relu'});
+//    layer_defs.push({type:'fc', num_neurons:50,  activation:'relu'});
+//    layer_defs.push({type:'fc', num_neurons:20,  activation:'relu'});
+//    layer_defs.push({type:'fc', num_neurons:10,  activation:'relu'});
+//    layer_defs.push({type:'regression', num_neurons:2});
+
+//    // define our net
+//    var net = new convnetjs.Net();
+//
+//    // create our net with layers as defined above
+//    net.makeLayers(layer_defs);
+//
+//    // define trainer
+//    var trainer = new convnetjs.SGDTrainer(net, {learning_rate:0.01, l2_decay:0.001});
 
     function playGame(convnet, convTrainer){
 

@@ -67,16 +67,15 @@ function getAlternative(){
 
     // filter out the real squares
     for (var i = 0; i < squareDivs.length; i++) {
-        if(squareDivs[i].style.display != "none") squares.push(squareDivs[i]);
+        if((squareDivs[i].style.display != "none")
+        && (squareDivs[i].className.substring(7) == "blank")) squares.push(squareDivs[i]);
     }
+    
+    var newIndex = Math.round(Math.random() * (squares.length-1));
 
-    for (var i = 0; i < squares.length; i++) {
-        if(squares[i].className.substring(7) == "blank"){
-            var x = parseInt(squares[i].id.split("_")[0]);
-            var y = parseInt(squares[i].id.split("_")[1]);
-            return [x,y];
-        }
-    }
+    var x = parseInt(squares[newIndex].id.split("_")[0]);
+    var y = parseInt(squares[newIndex].id.split("_")[1]);
+    return [x,y];
 }
 
 function clickSquare(x, y) {
