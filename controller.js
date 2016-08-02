@@ -5,7 +5,7 @@ var oldState     = [];
 var currentState = [];
 
 // fills currentState with the current state of the minesweeper game
-function getFieldState() {
+function updateFieldState() {
 
     // get all div elements with class name 'square'
     var squareDivs   = document.getElementsByClassName('square');
@@ -60,12 +60,20 @@ function gameEnded() {
 }
 
 function getAlternative(){
-    var newStateIDs = document.getElementsByClassName('square');
+    var squareDivs = document.getElementsByClassName('square');
 
-    for (var i = 0; i < newStateIDs.length; i++) {
-        if(newStateIDs[i].className.substring(7) == "blank"){
-            var x = parseInt(newStateIDs[i].id.split("_")[0]);
-            var y = parseInt(newStateIDs[i].id.split("_")[1]);
+    // container for clickable divs
+    var squares = [];
+
+    // filter out the real squares
+    for (var i = 0; i < squareDivs.length; i++) {
+        if(squareDivs[i].style.display != "none") squares.push(squareDivs[i]);
+    }
+
+    for (var i = 0; i < squares.length; i++) {
+        if(squares[i].className.substring(7) == "blank"){
+            var x = parseInt(squares[i].id.split("_")[0]);
+            var y = parseInt(squares[i].id.split("_")[1]);
             return [x,y];
         }
     }
@@ -108,7 +116,7 @@ function randomPlay(gameCount) {
 
 }
 
-
+// utilities ##########################################################
 
 // simulate clicks on divs (some SO answer)
 function simulate(element, eventName)
@@ -175,4 +183,15 @@ var defaultOptions = {
     metaKey: false,
     bubbles: true,
     cancelable: true
+}
+
+// chunksOf operator for creating sublists with chunkSize from a big list
+// chunksOf ([1,2,3,4,5], 2)
+// => [[1,2], [3,4], [5]]
+function chunksOf(arr, chunkSize){
+    var r = [];
+    for (var i = 0; i < arr.length; i+=chunkSize) {
+        r.push(arr.slice(i, i+chunkSize));
+    };
+    return r;
 }
