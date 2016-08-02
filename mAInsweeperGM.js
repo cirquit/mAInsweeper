@@ -41,6 +41,7 @@ function initConvNetJs () {
     // layer_defs.push({type:'fc', num_neurons:20, activation:'relu'});
 
     layer_defs.push({type:'input', out_sx:1, out_sy:1, out_depth:81});
+    layer_defs.push({type:'fc', num_neurons:100,  activation:'relu'});
     layer_defs.push({type:'fc', num_neurons:50,  activation:'relu'});
     layer_defs.push({type:'fc', num_neurons:20,  activation:'relu'});
     layer_defs.push({type:'fc', num_neurons:10,  activation:'relu'});
@@ -57,49 +58,58 @@ function initConvNetJs () {
 
     function playGame(convnet, convTrainer){
 
-        console.log("Starting game");
+        logWithP("######### Starting Game #########");
+
         newGame();
 
         while(!gameEnded()){
 
-            console.log("Updating state");
             updateFieldState();
-            console.log("state: " + currentState);
+            logWithP("state: " + currentState);
 
             var volume = new convnetjs.Vol(1,1,81,0,0);
             for(var i = 0; i < 9*9; i++){
                 volume.w[i] = currentState[i];
             }
 
-            console.log("Starting net")
             var coords = convnet.forward(volume).w;
-            console.log("Ended net")
 
             var xCoord = Math.round(coords[0]);
             var yCoord = Math.round(coords[1]);
 
-            console.log("coord[0]:" + coords[0] + ", coord[1]: " + coords[1]);
-
             if(xCoord < 1 || xCoord > 9 || yCoord < 1 || yCoord > 9){
-                console.log("tried to access x:" + xCoord + ", y: " + yCoord);
+                logWithP("tried to access x:" + xCoord + ", y: " + yCoord);
                 break;
             } else {
-                console.log("Clicking Square x:" + xCoord + ", y: " + yCoord);
+                logWithP("Clicking Square x:" + xCoord + ", y: " + yCoord);
                 clickSquare(xCoord, yCoord);
+
+                updateFieldState();
+                if (areEqual(currentState, oldState)){
+                    logWithP("State didn't change - break")
+                    break;
+                }
+                logWithP("State did change, going forward")
             }
         }
 
         convTrainer.train(volume, getAlternative());
     }
 
-    function playGames(convnet, convTrainer, count){
-        for(var i = 0; i < count; i++){
+    function playMultipleGames(convnet, convTrainer, count){
+        for(var myCounter = 0; myCounter < count; myCounter = myCounter + 1){
             playGame(convnet, convTrainer);
+            logWithP("counter: " + myCounter);
         }
     }
 
-    playGames(net, trainer, 10);
-    document.cookie = JSON.stringify(net.toJSON());
+    playMultipleGames(net, trainer, 3);
+    console.log(JSON.stringify(net.toJSON()));
 }
 
-alert("Done");
+
+function logWithP(input){
+    var tempVar = document.createElement("p");
+    tempVar.innerHTML = input
+    document.getElementsByTagName("body")[0].appendChild(tempVar);
+}
