@@ -1,14 +1,16 @@
+var maxX = 16;
+var maxY = 31
+var maxMines = 99;
+
 // oldState ist used to check if the state has changed after a "move" 
 var oldState     = [];
 
 // holds the current state of the minesweeper game
 var currentState = [];
 
-// fills currentState with the current state of the minesweeper game
-function updateFieldState() {
-
+function getRealSquares(){
     // get all div elements with class name 'square'
-    var squareDivs   = document.getElementsByClassName('square');
+    var squareDivs = document.getElementsByClassName('square');
 
     // container for clickable divs
     var squares = [];
@@ -17,6 +19,14 @@ function updateFieldState() {
     for (var i = 0; i < squareDivs.length; i++) {
         if(squareDivs[i].style.display != "none") squares.push(squareDivs[i]);
     }
+
+    return squares;
+}
+
+// fills currentState with the current state of the minesweeper game
+function updateFieldState() {
+
+    var squares = getRealSquares();
 
     // copy the state to compare later
     oldState = currentState.slice();
@@ -60,16 +70,9 @@ function gameEnded() {
 }
 
 function getAlternative(){
-    var squareDivs = document.getElementsByClassName('square');
 
     // container for clickable divs
-    var squares = [];
-
-    // filter out the real squares
-    for (var i = 0; i < squareDivs.length; i++) {
-        if((squareDivs[i].style.display != "none")
-        && (squareDivs[i].className.substring(7) == "blank")) squares.push(squareDivs[i]);
-    }
+    var squares = getRealSquares();
     
     var newIndex = Math.round(Math.random() * (squares.length-1));
 
@@ -88,11 +91,9 @@ function newGame(){
 }
 
 function randomPlay(gameCount) {
-    var sq = document.getElementsByClassName('square');
-    var squares = [];
-    for (var i = 0; i < sq.length; i++) {
-        if(sq[i].style.display != "none") squares.push(sq[i]);
-    }
+
+    var squares = getRealSquares();
+
     var rand;
     var count = 0;
 
@@ -114,6 +115,172 @@ function randomPlay(gameCount) {
     console.log("Clicked: " + gameCount);
 
 }
+
+function hasOpenNeighbor(id){
+    var neighbors = findNeighborIDs(id);
+
+    for (var i = 0; i < neighbors.length; i++) {
+        if(document.getElementById(neighbors[i]).className.substring(7,11) == "open")
+            return true;
+    }
+    return false;
+}
+
+function getAlternativeState() {
+    var state = [];
+
+    var squares = getRealSquares();
+
+    var blankCount = countBlanks();
+
+    for (var i = 0; i < squares.length; i++) {
+        switch(squares[i].className.substring(7)){
+            case "bombrevealed": {
+                console.log("revealed");
+                if (!hasOpenNeighbor(squares[i].id)) {
+                    state[i] = Math.round(100 * maxMines / blankCount);
+                } else {
+                    state[i] = 100;
+                }
+            }
+            break;
+            case "bombdeath": {
+                console.log("death");
+
+                if (!hasOpenNeighbor(squares[i].id)) {
+                    state[i] = Math.round(100 * maxMines / blankCount);
+                } else {
+                    state[i] = 100;
+                }
+            }
+            break;
+            case "blank": {
+                console.log("blank");
+
+                if (!hasOpenNeighbor(squares[i].id)) {
+                    state[i] = Math.round(100 * maxMines / blankCount);
+                } else {
+                    state[i] = 0;
+                }
+            }
+            break;
+            default: 
+                console.log("default");
+
+                state[i] = -1;
+        }
+    }
+    return state;
+}
+
+function countBlanks() {
+    var tempSquares = document.getElementsByClassName('square blank');
+    var squares = [];
+
+    for (var i = 0; i < tempSquares.length; i++) {
+        if(tempSquares[i].style.display != "none"){
+            squares.push(tempSquares[i]);
+        }
+    }
+
+    return squares.length;
+}
+
+function fillFieldWithState(state) {
+    var squares = getRealSquares();
+    var value = "";
+
+    for (var i = 0; i < squares.length; i++) {
+        value = "<p style:\"font-size:5px;text-align:center;\">" + state[i] + "</p>";
+        squares[i].innerHTML = value;
+    }
+
+}
+
+function findBlankNeighborIDs(id) {
+    var x = parseInt(id.split('_')[0]);
+    var y = parseInt(id.split('_')[1]);
+
+    var newX;
+    var newY;
+    var newID;
+
+    var newXWithinBounds;
+    var newYWithinBounds;
+
+    var neighborsIDs = [];
+
+    for (var i = -1; i <= 1; i++) {
+        for (var j = -1; j <= 1; j++) {
+            if (!(i == 0 && j == 0)) {
+                newX = x + i;
+                newY = y + j;
+
+                newID = newX + '_' + newY;
+
+                newXWithinBounds = (newX > 0) && (newX <= maxX);
+                newYWithinBounds = (newY > 0) && (newY <= maxY);
+
+                if (newXWithinBounds && newYWithinBounds) {
+                    if(document.getElementById(newID).className == "square blank"){
+                        neighborsIDs.push(newID);
+                    }
+                }
+            }
+        }
+    }
+
+    return neighborsIDs;
+}
+
+function findNeighborIDs(id) {
+    var x = parseInt(id.split('_')[0]);
+    var y = parseInt(id.split('_')[1]);
+
+    var newX;
+    var newY;
+    var newID;
+
+    var newXWithinBounds;
+    var newYWithinBounds;
+
+    var neighborsIDs = [];
+
+    for (var i = -1; i <= 1; i++) {
+        for (var j = -1; j <= 1; j++) {
+            if (!(i == 0 && j == 0)) {
+                newX = x + i;
+                newY = y + j;
+
+                newID = newX + '_' + newY;
+
+                newXWithinBounds = (newX > 0) && (newX <= maxX);
+                newYWithinBounds = (newY > 0) && (newY <= maxY);
+
+                if (newXWithinBounds && newYWithinBounds) {
+                    neighborsIDs.push(newID);
+                }
+            }
+        }
+    }
+
+    return neighborsIDs;
+}
+
+
+function findBlankNeighbors(id) {
+    var neighborsIDs = findBlankNeighborIDs(id);
+
+    var neighbors = []
+
+    for (var i = 0; i < neighborsIDs.length; i++) {
+        neighbors.push(document.getElementById(neighborsIDs[i]));
+    }
+
+    return neighbors;
+}
+
+
 
 // utilities ##########################################################
 
